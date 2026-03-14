@@ -34,6 +34,14 @@ describe('Picker', () => {
     exitMock.mockClear();
   });
 
+  it('renders the ASCII title', async () => {
+    const { lastFrame } = render(<Picker sessions={sessions} />);
+    await flushEffects();
+    
+    const frame = lastFrame() || '';
+    expect(frame).toContain('▀█▀ █▄█ █ █ ▀▄▀   █▀ █▀ █▀ █ █▀ █▀█ █▄ █ █▀');
+  });
+
   it('moves down with j and up with k in list mode', async () => {
     const { stdin, lastFrame } = render(<Picker sessions={sessions} />);
 
