@@ -14,16 +14,17 @@ describe('package metadata', () => {
     });
   });
 
-  it('is configured for pnpm only', async () => {
+  it('is configured for npm usage', async () => {
     const packageJson = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')) as {
       packageManager?: string;
       scripts?: Record<string, string>;
     };
 
-    expect(packageJson.packageManager).toMatch(/^pnpm@/);
-    expect(packageJson.scripts?.preinstall).toContain('pnpm');
-    expect(packageJson.scripts?.['publish:package']).toBe('pnpm publish');
-    expect(packageJson.scripts?.prepublishOnly).toBe('pnpm run build');
-    expect(existsSync(new URL('../package-lock.json', import.meta.url))).toBe(false);
+    expect(packageJson.packageManager).toMatch(/^npm@/);
+    expect(packageJson.scripts?.preinstall).toBeUndefined();
+    expect(packageJson.scripts?.['publish:package']).toBe('npm publish');
+    expect(packageJson.scripts?.prepublishOnly).toBe('npm run build');
+    expect(existsSync(new URL('../package-lock.json', import.meta.url))).toBe(true);
+    expect(existsSync(new URL('../pnpm-lock.yaml', import.meta.url))).toBe(false);
   });
 });
