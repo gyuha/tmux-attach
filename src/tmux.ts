@@ -1,6 +1,29 @@
 import { execSync } from 'node:child_process';
 import type { TmuxSession } from './types.js';
 
+/**
+ * Check if we're currently inside a tmux session.
+ */
+export function isInsideTmux(): boolean {
+  return !!process.env.TMUX;
+}
+
+/**
+ * Get the current tmux session name if inside tmux.
+ */
+export function getCurrentSessionName(): string | null {
+  if (!isInsideTmux()) {
+    return null;
+  }
+  try {
+    return execSync('tmux display-message -p "#{session_name}"', {
+      encoding: 'utf-8',
+    }).trim();
+  } catch {
+    return null;
+  }
+}
+
 export function getSessions(): TmuxSession[] {
   try {
     const output = execSync('tmux list-sessions -F "#{session_name}:#{session_attached}:#{session_windows}:#{session_created}" 2>/dev/null', {
@@ -53,9 +76,17 @@ export function escapeSessionName(name: string): string {
 
 export function attachSession(sessionName: string): void {
   const escapedName = escapeSessionName(sessionName);
-  execSync(`tmux attach -t ${escapedName}`, {
-    stdio: 'inherit',
-  });
+  if (isInsideTmux()) {
+    // Inside tmux: use switch-client to switch to another session
+    execSync(`tmux switch-client -t ${escapedName}`, {
+      stdio: 'inherit',
+    });
+  } else {
+    // Outside tmux: use attach
+    execSync(`tmux attach -t ${escapedName}`, {
+      stdio: 'inherit',
+    });
+  }
 }
 
 export function newSession(sessionName: string): void {

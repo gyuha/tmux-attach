@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as childProcess from 'node:child_process';
-import { getSessions, hasSessions, attachSession, newSession, escapeSessionName } from '../src/tmux.js';
+import { getSessions, hasSessions, attachSession, newSession, escapeSessionName, isInsideTmux } from '../src/tmux.js';
 
 vi.mock('node:child_process');
 
@@ -9,10 +9,13 @@ describe('tmux', () => {
 
   beforeEach(() => {
     execSyncMock = vi.spyOn(childProcess, 'execSync');
+    // Default: not inside tmux
+    delete process.env.TMUX;
   });
 
   afterEach(() => {
     execSyncMock.mockRestore();
+    delete process.env.TMUX;
   });
 
   describe('getSessions', () => {
@@ -92,7 +95,8 @@ describe('tmux', () => {
   });
 
   describe('attachSession', () => {
-    it('executes tmux attach with escaped session name', () => {
+    it('executes tmux attach with escaped session name (outside tmux)', () => {
+      delete process.env.TMUX;
       execSyncMock.mockReturnValue('');
 
       attachSession('work');
@@ -103,7 +107,20 @@ describe('tmux', () => {
       );
     });
 
+    it('executes tmux switch-client when inside tmux', () => {
+      process.env.TMUX = '/tmp/tmux-1000/default,1234,0';
+      execSyncMock.mockReturnValue('');
+
+      attachSession('work');
+
+      expect(execSyncMock).toHaveBeenCalledWith(
+        'tmux switch-client -t work',
+        expect.objectContaining({ stdio: 'inherit' })
+      );
+    });
+
     it('escapes session names with special characters', () => {
+      delete process.env.TMUX;
       execSyncMock.mockReturnValue('');
 
       attachSession('my project; rm -rf /');

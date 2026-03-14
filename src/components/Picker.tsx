@@ -3,7 +3,7 @@ import { Box, Text, useInput, useApp } from 'ink';
 import type { TmuxSession } from '../types.js';
 import { SessionItem } from './SessionItem.js';
 import { NewSessionInput } from './NewSessionInput.js';
-import { attachSession, newSession } from '../tmux.js';
+import { attachSession, newSession, isInsideTmux, getCurrentSessionName } from '../tmux.js';
 
 interface PickerProps {
   sessions: TmuxSession[];
@@ -15,6 +15,8 @@ export function Picker({ sessions }: PickerProps) {
   const [mode, setMode] = useState<'list' | 'input'>('list');
   const [newSessionName, setNewSessionName] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const currentSession = getCurrentSessionName();
+  const insideTmux = isInsideTmux();
 
   // Total items: "New session" + existing sessions
   const totalItems = 1 + sessions.length;
@@ -99,6 +101,11 @@ export function Picker({ sessions }: PickerProps) {
         <Text bold color="cyan">
           tmux sessions
         </Text>
+        {insideTmux && currentSession && (
+          <Text dimColor>
+            (current: {currentSession})
+          </Text>
+        )}
       </Box>
 
       <Box flexDirection="column" borderStyle="round" borderColor="gray" padding={1}>
