@@ -90,4 +90,63 @@ describe('tmux', () => {
       expect(hasSessions()).toBe(false);
     });
   });
+
+  describe('attachSession', () => {
+    it('executes tmux attach with escaped session name', () => {
+      execSyncMock.mockReturnValue('');
+
+      attachSession('work');
+
+      expect(execSyncMock).toHaveBeenCalledWith(
+        'tmux attach -t work',
+        expect.objectContaining({ stdio: 'inherit' })
+      );
+    });
+
+    it('escapes session names with special characters', () => {
+      execSyncMock.mockReturnValue('');
+
+      attachSession('my project; rm -rf /');
+
+      // Should escape the dangerous characters
+      expect(execSyncMock).toHaveBeenCalledWith(
+        'tmux attach -t my_project__rm_-rf__',
+        expect.any(Object)
+      );
+    });
+
+    it('throws error for invalid session names', () => {
+      expect(() => attachSession('')).toThrow('Session name cannot be empty');
+      expect(() => attachSession('.hidden')).toThrow('cannot start with . or -');
+    });
+  });
+
+  describe('newSession', () => {
+    it('executes tmux new-session with escaped session name', () => {
+      execSyncMock.mockReturnValue('');
+
+      newSession('myproject');
+
+      expect(execSyncMock).toHaveBeenCalledWith(
+        'tmux new-session -s myproject',
+        expect.objectContaining({ stdio: 'inherit' })
+      );
+    });
+
+    it('escapes session names with special characters', () => {
+      execSyncMock.mockReturnValue('');
+
+      newSession('my project');
+
+      expect(execSyncMock).toHaveBeenCalledWith(
+        'tmux new-session -s my_project',
+        expect.any(Object)
+      );
+    });
+
+    it('throws error for invalid session names', () => {
+      expect(() => newSession('')).toThrow('Session name cannot be empty');
+      expect(() => newSession('.hidden')).toThrow('cannot start with . or -');
+    });
+  });
 });

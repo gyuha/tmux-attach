@@ -51,6 +51,20 @@ export function escapeSessionName(name: string): string {
   return escaped;
 }
 
+export function attachSession(sessionName: string): void {
+  const escapedName = escapeSessionName(sessionName);
+  execSync(`tmux attach -t ${escapedName}`, {
+    stdio: 'inherit',
+  });
+}
+
+export function newSession(sessionName: string): void {
+  const escapedName = escapeSessionName(sessionName);
+  execSync(`tmux new-session -s ${escapedName}`, {
+    stdio: 'inherit',
+  });
+}
+
 export function hasSessions(): boolean {
   return getSessions().length > 0;
 }
