@@ -1,0 +1,43 @@
+{
+  "name": "tmux-attach",
+  "version": "0.1.0",
+  "description": "A CLI to quickly choose and enter tmux sessions",
+  "type": "module",
+  "bin": {
+    "tmux-attach": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "tmux",
+    "cli",
+    "session",
+    "picker"
+  ],
+  "author": "gyuha",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.12",
+    "@vitest/coverage-v8": "^3.0.0",
+    "ink-testing-library": "^4.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "dependencies": {
+    "ink": "^5.0.0",
+    "react": "^18.3.1"
+  }
+}
