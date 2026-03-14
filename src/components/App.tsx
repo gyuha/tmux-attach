@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Text } from 'ink';
-import { hasSessions, getSessions } from '../tmux.js';
+import { getSessions } from '../tmux.js';
 import type { TmuxSession } from '../types.js';
 import { Picker } from './Picker.js';
 
@@ -10,12 +10,6 @@ export function App() {
 
   useEffect(() => {
     function checkSessions() {
-      const hasAny = hasSessions();
-      if (!hasAny) {
-        // Direct mode: no sessions, launch tmux immediately
-        process.exit(0);
-      }
-
       const sessionList = getSessions();
       setSessions(sessionList);
       setIsLoading(false);

@@ -30,7 +30,7 @@ tmux-attach
 
 ### Keyboard Navigation
 
-- `↑/↓` - Navigate between options
+- `↑/↓` or `j/k` - Navigate between options
 - `Enter` - Select highlighted option
 - `Esc` or `q` - Exit without attaching
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Text, useInput, useApp } from 'ink';
 import type { TmuxSession } from '../types.js';
 import { SessionItem } from './SessionItem.js';
@@ -49,9 +49,9 @@ export function Picker({ sessions }: PickerProps) {
     }
 
     // List mode navigation
-    if (key.upArrow) {
+    if (key.upArrow || input === 'k') {
       setSelectedIndex((prev) => (prev - 1 + totalItems) % totalItems);
-    } else if (key.downArrow) {
+    } else if (key.downArrow || input === 'j') {
       setSelectedIndex((prev) => (prev + 1) % totalItems);
     } else if (key.return) {
       handleSelect(selectedIndex);
@@ -140,7 +140,7 @@ export function Picker({ sessions }: PickerProps) {
       <Box marginTop={1}>
         <Text dimColor>
           {mode === 'list'
-            ? '↑/↓ navigate · Enter select · Esc quit'
+            ? '↑/↓/j/k navigate · Enter select · Esc/q quit'
             : 'Enter confirm · Esc cancel'}
         </Text>
       </Box>
