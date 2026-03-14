@@ -11,13 +11,15 @@ A CLI tool that helps you quickly choose and enter tmux sessions.
 ## Installation
 
 ```bash
-npm install -g tmux-attach
+pnpm add -g tmux-attach
 ```
 
-Or try it once with npx:
+This installs both `tmux-attach` and the shorter `ta` alias.
+
+Or try it once with `pnpm dlx`:
 
 ```bash
-npx tmux-attach
+pnpm dlx tmux-attach
 ```
 
 ## Usage
@@ -26,6 +28,12 @@ Just run:
 
 ```bash
 tmux-attach
+```
+
+Or use the short alias:
+
+```bash
+ta
 ```
 
 ### Keyboard Navigation

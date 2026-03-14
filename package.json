@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "description": "A CLI to quickly choose and enter tmux sessions",
   "type": "module",
+  "packageManager": "pnpm@10.28.2",
   "bin": {
-    "tmux-attach": "./dist/index.js"
+    "tmux-attach": "./dist/index.js",
+    "ta": "./dist/index.js"
   },
   "files": [
     "dist"
@@ -12,10 +14,12 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
+    "preinstall": "node -e \"const ua = process.env.npm_config_user_agent || ''; if (!ua.startsWith('pnpm/')) { console.error('This project uses pnpm only.'); process.exit(1); }\"",
+    "publish:package": "pnpm publish",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "pnpm run build"
   },
   "keywords": [
     "tmux",
