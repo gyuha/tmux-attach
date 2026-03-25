@@ -23,6 +23,10 @@ async function loadEntrypoint() {
     App: () => null,
   }));
 
+  vi.doMock('../src/components/Picker.js', () => ({
+    Picker: () => null,
+  }));
+
   await import('../src/index.tsx');
 }
 
@@ -39,16 +43,14 @@ describe('CLI startup', () => {
     vi.restoreAllMocks();
   });
 
-  it('launches tmux immediately when no sessions exist', async () => {
+  it('renders the new-session dialog when no sessions exist', async () => {
     isInsideTmuxMock.mockReturnValue(false);
     hasSessionsMock.mockReturnValue(false);
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => undefined as never) as typeof process.exit);
 
     await loadEntrypoint();
 
-    expect(execSyncMock).toHaveBeenCalledWith('tmux', { stdio: 'inherit' });
-    expect(exitSpy).toHaveBeenCalledWith(0);
-    expect(renderMock).not.toHaveBeenCalled();
+    expect(renderMock).toHaveBeenCalledTimes(1);
+    expect(execSyncMock).not.toHaveBeenCalled();
   });
 
   it('renders the app when sessions exist', async () => {

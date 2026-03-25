@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from 'ink-testing-library';
 import { Picker } from '../../src/components/Picker.js';
+import { newSession } from '../../src/tmux.js';
 
 const exitMock = vi.fn();
 
@@ -15,6 +16,7 @@ vi.mock('ink', async () => {
 
 vi.mock('../../src/tmux.js', () => ({
   attachSession: vi.fn(),
+  getDefaultSessionName: vi.fn(() => process.cwd().split('/').pop() || 'session'),
   newSession: vi.fn(),
   isInsideTmux: vi.fn(() => false),
   getCurrentSessionName: vi.fn(() => null),
@@ -32,6 +34,7 @@ const flushEffects = async () => {
 describe('Picker', () => {
   beforeEach(() => {
     exitMock.mockClear();
+    vi.mocked(newSession).mockClear();
   });
 
   it('renders the ASCII title', async () => {
@@ -73,5 +76,28 @@ describe('Picker', () => {
     stdin.write('\u001B');
 
     expect(exitMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('starts in input mode when requested and prefills the current directory name', async () => {
+    const cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/tmp/my-project');
+    const { lastFrame } = render(<Picker sessions={[]} initialMode="input" />);
+
+    await flushEffects();
+
+    expect(lastFrame()).toContain('New session name:');
+    expect(lastFrame()).toContain('my-project');
+    cwdSpy.mockRestore();
+  });
+
+  it('creates a new session from the empty-state dialog on enter', async () => {
+    const cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue('/tmp/my-project');
+    const { stdin } = render(<Picker sessions={[]} initialMode="input" />);
+
+    await flushEffects();
+    stdin.write('\r');
+
+    expect(newSession).toHaveBeenCalledWith('my-project');
+    expect(exitMock).toHaveBeenCalledTimes(1);
+    cwdSpy.mockRestore();
   });
 });

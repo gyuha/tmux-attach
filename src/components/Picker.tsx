@@ -4,16 +4,23 @@ import type { TmuxSession } from '../types.js';
 import { SessionItem } from './SessionItem.js';
 import { NewSessionInput } from './NewSessionInput.js';
 import { Title } from './Title.js';
-import { attachSession, newSession, isInsideTmux, getCurrentSessionName } from '../tmux.js';
+import {
+  attachSession,
+  newSession,
+  isInsideTmux,
+  getCurrentSessionName,
+  getDefaultSessionName,
+} from '../tmux.js';
 
 interface PickerProps {
   sessions: TmuxSession[];
+  initialMode?: 'list' | 'input';
 }
 
-export function Picker({ sessions }: PickerProps) {
+export function Picker({ sessions, initialMode = 'list' }: PickerProps) {
   const { exit } = useApp();
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [mode, setMode] = useState<'list' | 'input'>('list');
+  const [mode, setMode] = useState<'list' | 'input'>(initialMode);
   const [newSessionName, setNewSessionName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const currentSession = getCurrentSessionName();
@@ -23,10 +30,7 @@ export function Picker({ sessions }: PickerProps) {
   const totalItems = 1 + sessions.length;
 
   useEffect(() => {
-    // Prefill new session name with current directory
-    const cwd = process.cwd();
-    const dirName = cwd.split('/').pop() || 'session';
-    setNewSessionName(dirName);
+    setNewSessionName(getDefaultSessionName());
   }, []);
 
   useInput((input, key) => {
@@ -64,6 +68,7 @@ export function Picker({ sessions }: PickerProps) {
   function handleSelect(index: number) {
     if (index === 0) {
       // New session selected
+      setError(null);
       setMode('input');
     } else {
       // Existing session selected
@@ -83,6 +88,7 @@ export function Picker({ sessions }: PickerProps) {
       return;
     }
     try {
+      setError(null);
       newSession(newSessionName.trim());
       exit();
     } catch (err) {
@@ -123,7 +129,7 @@ export function Picker({ sessions }: PickerProps) {
         )}
       </Box>
 
-      {error && (
+      {error && mode === 'list' && (
         <Box marginTop={1}>
           <Text color="red">{error}</Text>
         </Box>

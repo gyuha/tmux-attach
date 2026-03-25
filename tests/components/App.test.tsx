@@ -6,6 +6,7 @@ import { getSessions } from '../../src/tmux.js';
 vi.mock('../../src/tmux.js', () => ({
   hasSessions: vi.fn(),
   getSessions: vi.fn(),
+  getDefaultSessionName: vi.fn(() => process.cwd().split('/').pop() || 'session'),
   attachSession: vi.fn(),
   newSession: vi.fn(),
   isInsideTmux: vi.fn(() => false),

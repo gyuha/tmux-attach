@@ -48,6 +48,11 @@ export function getSessions(): TmuxSession[] {
   }
 }
 
+export function getDefaultSessionName(cwd = process.cwd()): string {
+  const trimmedPath = cwd.replace(/\/+$/, '');
+  return trimmedPath.split('/').pop() || 'session';
+}
+
 /**
  * Escape and validate a session name to prevent command injection.
  * tmux session names should only contain alphanumeric, dash, underscore, and dot.
