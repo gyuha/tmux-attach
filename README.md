@@ -2,6 +2,8 @@
 
 A CLI tool that helps you quickly choose and enter tmux sessions.
 
+![tmux-attach demo](./docs/screenshot.png)
+
 ## Features
 
 - **Smart mode detection**: No sessions? Launches tmux directly. Sessions exist? Shows a clean picker.
