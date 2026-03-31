@@ -11,6 +11,7 @@ import {
   getCurrentSessionName,
   getDefaultSessionName,
 } from '../tmux.js';
+import { TMUX_TIPS, getRandomTipIndex } from '../tips.js';
 
 interface PickerProps {
   sessions: TmuxSession[];
@@ -23,6 +24,7 @@ export function Picker({ sessions, initialMode = 'list' }: PickerProps) {
   const [mode, setMode] = useState<'list' | 'input'>(initialMode);
   const [newSessionName, setNewSessionName] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [tipIndex, setTipIndex] = useState(() => getRandomTipIndex(TMUX_TIPS.length));
   const currentSession = getCurrentSessionName();
   const insideTmux = isInsideTmux();
 
@@ -56,8 +58,10 @@ export function Picker({ sessions, initialMode = 'list' }: PickerProps) {
     // List mode navigation
     if (key.upArrow || input === 'k') {
       setSelectedIndex((prev) => (prev - 1 + totalItems) % totalItems);
+      setTipIndex((prev) => (prev + 1) % TMUX_TIPS.length);
     } else if (key.downArrow || input === 'j') {
       setSelectedIndex((prev) => (prev + 1) % totalItems);
+      setTipIndex((prev) => (prev + 1) % TMUX_TIPS.length);
     } else if (key.return) {
       handleSelect(selectedIndex);
     } else if (key.escape || input === 'q') {
@@ -142,6 +146,14 @@ export function Picker({ sessions, initialMode = 'list' }: PickerProps) {
             : 'Enter confirm · Esc cancel'}
         </Text>
       </Box>
+
+      {mode === 'list' && (
+        <Box marginTop={0}>
+          <Text dimColor color="cyan">
+            Tip: {TMUX_TIPS[tipIndex]}
+          </Text>
+        </Box>
+      )}
     </Box>
   );
 }
