@@ -2,7 +2,7 @@
 
 A CLI tool that helps you quickly choose and enter tmux sessions.
 
-![tmux-attach demo](./docs/screenshot.png)
+![tmux-attach demo](https://github.com/gyuha/tmux-attach/blob/main/docs/screenshot.png?raw=true)
 
 ## Features
 
