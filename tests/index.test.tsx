@@ -65,6 +65,7 @@ describe('CLI startup', () => {
 
   it('prints an error and exits when running inside tmux', async () => {
     isInsideTmuxMock.mockReturnValue(true);
+    hasSessionsMock.mockReturnValue(true);
     const exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => undefined as never) as typeof process.exit);
     const stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
 

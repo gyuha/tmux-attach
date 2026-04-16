@@ -1,11 +1,34 @@
 import { execSync } from 'node:child_process';
 import type { TmuxSession } from './types.js';
 
+const TMUX_TERM_PREFIXES = ['screen', 'tmux'];
+const IDE_TERM_PROGRAMS = new Set(['vscode']);
+const IDE_TERMINAL_EMULATORS = new Set(['JetBrains-JediTerm']);
+
+function isIdeTerminal(): boolean {
+  const termProgram = process.env.TERM_PROGRAM ?? '';
+  const terminalEmulator = process.env.TERMINAL_EMULATOR ?? '';
+
+  return IDE_TERM_PROGRAMS.has(termProgram) || IDE_TERMINAL_EMULATORS.has(terminalEmulator);
+}
+
 /**
- * Check if we're currently inside a tmux session.
+ * Check if we're running inside an active tmux client.
+ * Some terminals propagate TMUX without exposing the user to tmux directly.
  */
 export function isInsideTmux(): boolean {
-  return !!process.env.TMUX;
+  if (!process.env.TMUX) {
+    return false;
+  }
+
+  if (isIdeTerminal()) {
+    return false;
+  }
+
+  const term = process.env.TERM ?? '';
+  const termProgram = process.env.TERM_PROGRAM ?? '';
+
+  return TMUX_TERM_PREFIXES.some((prefix) => term.startsWith(prefix)) || termProgram === 'tmux';
 }
 
 /**

@@ -9,7 +9,7 @@ A CLI tool that helps you quickly choose and enter tmux sessions.
 - **Smart mode detection**: No sessions? Launches tmux directly. Sessions exist? Shows a clean picker.
 - **Fast session creation**: "New session" is always first, with the name prefilled from your current directory.
 - **Clean TUI**: Centered, spacious fullscreen picker with a custom ASCII title optimized for quick decisions.
-- **Safe startup behavior**: Refuses to run from inside tmux, so it does not interrupt an existing client session.
+- **Accurate environment detection**: Blocks execution in an active tmux client, but allows terminals that only inherit tmux-related environment variables.
 
 ## Installation
 
@@ -33,7 +33,7 @@ Just run:
 tmux-attach
 ```
 
-Run it from a regular shell, not from inside an active tmux session.
+Run it from a regular shell or a tmux-backed terminal that is not exposing an active tmux client. If you are already inside an interactive tmux session, `tmux-attach` exits immediately.
 
 Or use the short alias:
 

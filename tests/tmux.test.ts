@@ -9,13 +9,55 @@ describe('tmux', () => {
 
   beforeEach(() => {
     execSyncMock = vi.spyOn(childProcess, 'execSync');
-    // Default: not inside tmux
     delete process.env.TMUX;
+    delete process.env.TERM;
+    delete process.env.TERM_PROGRAM;
   });
 
   afterEach(() => {
     execSyncMock.mockRestore();
     delete process.env.TMUX;
+    delete process.env.TERM;
+    delete process.env.TERM_PROGRAM;
+  });
+
+  describe('isInsideTmux', () => {
+    it('returns false when TMUX is unset', () => {
+      process.env.TERM = 'tmux-256color';
+
+      expect(isInsideTmux()).toBe(false);
+    });
+
+    it('returns false when TMUX leaks into a non-tmux terminal', () => {
+      process.env.TMUX = '/tmp/tmux-1000/default,1234,0';
+      process.env.TERM = 'xterm-256color';
+      process.env.TERM_PROGRAM = 'Antigravity';
+
+      expect(isInsideTmux()).toBe(false);
+    });
+
+    it('returns true when TERM indicates a tmux client', () => {
+      process.env.TMUX = '/tmp/tmux-1000/default,1234,0';
+      process.env.TERM = 'tmux-256color';
+
+      expect(isInsideTmux()).toBe(true);
+    });
+
+    it('returns true when TERM_PROGRAM indicates tmux', () => {
+      process.env.TMUX = '/tmp/tmux-1000/default,1234,0';
+      process.env.TERM = 'xterm-256color';
+      process.env.TERM_PROGRAM = 'tmux';
+
+      expect(isInsideTmux()).toBe(true);
+    });
+
+    it('returns false for VS Code terminals that inherit tmux env vars', () => {
+      process.env.TMUX = '/tmp/tmux-1000/default,1234,0';
+      process.env.TERM = 'screen-256color';
+      process.env.TERM_PROGRAM = 'vscode';
+
+      expect(isInsideTmux()).toBe(false);
+    });
   });
 
   describe('getSessions', () => {
@@ -109,12 +151,41 @@ describe('tmux', () => {
 
     it('executes tmux switch-client when inside tmux', () => {
       process.env.TMUX = '/tmp/tmux-1000/default,1234,0';
+      process.env.TERM = 'tmux-256color';
       execSyncMock.mockReturnValue('');
 
       attachSession('work');
 
       expect(execSyncMock).toHaveBeenCalledWith(
         'tmux switch-client -t work',
+        expect.objectContaining({ stdio: 'inherit' })
+      );
+    });
+
+    it('uses tmux attach when TMUX is set by a non-tmux terminal', () => {
+      process.env.TMUX = '/tmp/tmux-1000/default,1234,0';
+      process.env.TERM = 'xterm-256color';
+      process.env.TERM_PROGRAM = 'Antigravity';
+      execSyncMock.mockReturnValue('');
+
+      attachSession('work');
+
+      expect(execSyncMock).toHaveBeenCalledWith(
+        'tmux attach -t work',
+        expect.objectContaining({ stdio: 'inherit' })
+      );
+    });
+
+    it('uses tmux attach for VS Code terminals that inherit tmux env vars', () => {
+      process.env.TMUX = '/tmp/tmux-1000/default,1234,0';
+      process.env.TERM = 'screen-256color';
+      process.env.TERM_PROGRAM = 'vscode';
+      execSyncMock.mockReturnValue('');
+
+      attachSession('work');
+
+      expect(execSyncMock).toHaveBeenCalledWith(
+        'tmux attach -t work',
         expect.objectContaining({ stdio: 'inherit' })
       );
     });
