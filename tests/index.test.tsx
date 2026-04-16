@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest';
+import { readFile } from 'node:fs/promises';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const execSyncMock = vi.fn();
 const renderMock = vi.fn();
@@ -31,16 +32,20 @@ async function loadEntrypoint() {
 }
 
 describe('CLI startup', () => {
+  const originalArgv = [...process.argv];
+
   beforeEach(() => {
     vi.resetModules();
     execSyncMock.mockReset();
     renderMock.mockReset();
     hasSessionsMock.mockReset();
     isInsideTmuxMock.mockReset();
+    process.argv = [...originalArgv];
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
+    process.argv = [...originalArgv];
   });
 
   it('renders the new-session dialog when no sessions exist', async () => {
@@ -75,5 +80,27 @@ describe('CLI startup', () => {
     expect(exitSpy).toHaveBeenCalledWith(1);
     expect(execSyncMock).not.toHaveBeenCalled();
     expect(renderMock).not.toHaveBeenCalled();
+  });
+
+  it('prints the current version when --version is passed', async () => {
+    const packageJson = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')) as {
+      version: string;
+    };
+
+    process.argv = ['node', 'tmux-attach', '--version'];
+    isInsideTmuxMock.mockReturnValue(true);
+    hasSessionsMock.mockReturnValue(true);
+
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => undefined as never) as typeof process.exit);
+    const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    const stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+
+    await loadEntrypoint();
+
+    expect(stdoutSpy).toHaveBeenCalledWith(`${packageJson.version}\n`);
+    expect(stderrSpy).not.toHaveBeenCalled();
+    expect(exitSpy).not.toHaveBeenCalled();
+    expect(renderMock).not.toHaveBeenCalled();
+    expect(execSyncMock).not.toHaveBeenCalled();
   });
 });

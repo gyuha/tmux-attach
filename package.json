@@ -1,6 +1,6 @@
 {
   "name": "tmux-attach",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "description": "A CLI to quickly choose and enter tmux sessions",
   "type": "module",
   "packageManager": "npm@10.9.2",
